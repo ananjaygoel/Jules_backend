@@ -64,4 +64,11 @@ describe('Feed API', () => {
     expect(res.statusCode).toEqual(402);
     expect(res.body.error).toBe('Insufficient coins');
   });
+
+  it('should return a 400 error for an invalid episode ID', async () => {
+    const res = await request(app)
+      .get('/api/feed/episode/invalid_id');
+    expect(res.statusCode).toEqual(400);
+    expect(res.body.error).toBe('Invalid ID');
+  });
 });

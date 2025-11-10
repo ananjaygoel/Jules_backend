@@ -1,4 +1,5 @@
 const Joi = require('joi');
+const mongoose = require('mongoose');
 
 const registerSchema = Joi.object({
   firebaseUid: Joi.string().required(),
@@ -29,6 +30,10 @@ const createSubscriptionSchema = Joi.object({
   couponCode: Joi.string(),
 });
 
+const assignAdminRoleSchema = Joi.object({
+  email: Joi.string().email().required(),
+});
+
 const validationMiddleware = (schema) => {
   return (req, res, next) => {
     const { error } = schema.validate(req.body);
@@ -39,11 +44,20 @@ const validationMiddleware = (schema) => {
   };
 };
 
+const validateObjectId = (req, res, next) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ error: 'Invalid ID' });
+  }
+  next();
+};
+
 module.exports = {
   registerSchema,
   createSeriesSchema,
   createEpisodeSchema,
   createCouponSchema,
   createSubscriptionSchema,
+  assignAdminRoleSchema,
   validationMiddleware,
+  validateObjectId,
 };
