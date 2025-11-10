@@ -35,16 +35,9 @@ exports.createSubscription = async (req, res) => {
   }
 
   try {
-    const price = await stripe.prices.create({
-      unit_amount: 30000,
-      currency: 'inr',
-      recurring: { interval: 'year' },
-      product_data: { name: 'WOOD Annual Subscription' },
-    });
-
     const sessionOptions = {
       payment_method_types: ['card'],
-      line_items: [{ price: price.id, quantity: 1 }],
+      line_items: [{ price: process.env.STRIPE_PRICE_ID, quantity: 1 }],
       mode: 'subscription',
       customer: user.stripeCustomerId,
       success_url: `${process.env.CLIENT_URL}/success`,
@@ -85,7 +78,8 @@ exports.stripeWebhook = async (req, res) => {
     const paymentIntent = event.data.object;
     const user = await User.findOne({ stripeCustomerId: paymentIntent.customer });
     if (user) {
-      const coinsPurchased = paymentIntent.amount_received;
+      const amountInRupees = paymentIntent.amount_received / 100;
+      const coinsPurchased = amountInRupees * 10;
       user.coins += coinsPurchased;
       await user.save();
     }

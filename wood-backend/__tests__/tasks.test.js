@@ -42,4 +42,17 @@ describe('Tasks API', () => {
     expect(res.body.coins_earned).toBeGreaterThanOrEqual(100);
     expect(res.body.coins_earned).toBeLessThanOrEqual(300);
   });
+
+  it('should not give a subscription bonus to a user with an expired subscription', async () => {
+    const expiryDate = new Date();
+    expiryDate.setFullYear(expiryDate.getFullYear() - 1);
+    user.subscriptionStatus = 'active';
+    user.subscriptionExpiry = expiryDate;
+    await user.save();
+
+    const res = await request(app)
+      .post('/api/tasks/daily/watch-ad');
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.coins_earned).toBe(10);
+  });
 });

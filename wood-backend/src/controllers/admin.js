@@ -1,6 +1,7 @@
 const Series = require('../models/series');
 const Episode = require('../models/episode');
 const Coupon = require('../models/coupon');
+const User = require('../models/user');
 
 exports.createSeries = async (req, res) => {
   try {
@@ -76,6 +77,19 @@ exports.deleteCoupon = async (req, res) => {
   try {
     await Coupon.findByIdAndDelete(req.params.id);
     res.status(204).send();
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+exports.assignAdminRole = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOneAndUpdate({ email }, { role: 'admin' }, { new: true });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.status(200).json(user);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

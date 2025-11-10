@@ -1,5 +1,6 @@
 const User = require('../models/user');
 const config = require('../config');
+const { isSubscriptionActive } = require('../helpers/subscription');
 
 const isSameDay = (date1, date2) => {
   return (
@@ -78,7 +79,7 @@ exports.watchAd = async (req, res) => {
     coins = config.adRewards.tier4.coins;
   }
 
-  if (user.subscriptionStatus === 'active') {
+  if (isSubscriptionActive(user)) {
     coins += config.subscriptionBonus;
   }
 
@@ -103,7 +104,7 @@ exports.spinWheel = async (req, res) => {
     coins = config.spinWheel.winAmount;
   }
 
-  if (user.subscriptionStatus === 'active') {
+  if (isSubscriptionActive(user)) {
     coins += config.subscriptionBonus;
   }
 

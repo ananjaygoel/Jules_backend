@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const _ = require('lodash');
 
 exports.register = async (req, res) => {
   try {
@@ -26,7 +27,10 @@ exports.getUser = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, {
+    const allowedUpdates = ['name', 'date_of_birth', 'country', 'preferred_genres'];
+    const updates = _.pick(req.body, allowedUpdates);
+
+    const user = await User.findByIdAndUpdate(req.params.id, updates, {
       new: true,
     });
     res.status(200).json(user);
