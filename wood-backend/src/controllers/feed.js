@@ -36,18 +36,25 @@ exports.getSeries = async (req, res) => {
 exports.getEpisode = async (req, res) => {
   try {
     const episode = await Episode.findById(req.params.id);
+    if (!episode) {
+      return res.status(404).json({ error: 'Episode not found' });
+    }
+
     if (episode.episodeNumber <= config.episodeFreeLimit) {
       return res.status(200).json(episode);
     }
 
-    const user = await User.findOne({ firebaseUid: req.user.uid });
-    if (user.coins >= config.episodeCost) {
-      user.coins -= config.episodeCost;
-      await user.save();
-      return res.status(200).json(episode);
+    const updatedUser = await User.findOneAndUpdate(
+      { firebaseUid: req.user.uid, coins: { $gte: config.episodeCost } },
+      { $inc: { coins: -config.episodeCost } },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(402).json({ error: 'Insufficient coins' });
     }
 
-    res.status(402).json({ error: 'Insufficient coins' });
+    return res.status(200).json(episode);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

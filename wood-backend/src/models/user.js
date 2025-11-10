@@ -15,6 +15,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    index: true,
   },
   date_of_birth: {
     type: Date,
@@ -39,7 +40,7 @@ const userSchema = new mongoose.Schema({
     default: 0,
   },
   lastAdWatched: {
-    type: Date,
+    type: String, // YYYY-MM-DD in UTC
   },
   profileCompleted: {
     type: Boolean,
@@ -49,15 +50,11 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  referralsThisMonth: {
-    type: Number,
-    default: 0,
-  },
-  lastReferralDate: {
+  lastMonthlyBonus: {
     type: Date,
   },
   lastSpinDate: {
-    type: Date,
+    type: String, // YYYY-MM-DD in UTC
   },
   stripeCustomerId: {
     type: String,

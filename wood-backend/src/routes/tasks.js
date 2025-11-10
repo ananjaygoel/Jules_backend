@@ -5,8 +5,10 @@ const authMiddleware = require('../middleware/auth');
 
 // One-time tasks
 router.post('/onetime/complete-profile', authMiddleware, tasksController.completeProfile);
-router.post('/onetime/referral', authMiddleware, tasksController.successfulReferral);
 router.post('/onetime/follow-social', authMiddleware, tasksController.followSocialMedia);
+
+// Monthly tasks
+router.post('/monthly/bonus', authMiddleware, tasksController.monthlyBonus);
 
 // Daily tasks
 router.post('/daily/watch-ad', authMiddleware, tasksController.watchAd);

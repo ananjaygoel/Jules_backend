@@ -2,6 +2,7 @@ const request = require('supertest');
 const app = require('../src/index');
 const mongoose = require('mongoose');
 const User = require('../src/models/user');
+const config = require('../src/config');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
 // Mock the auth middleware
@@ -54,5 +55,16 @@ describe('Tasks API', () => {
       .post('/api/tasks/daily/watch-ad');
     expect(res.statusCode).toEqual(200);
     expect(res.body.coins_earned).toBe(10);
+  });
+
+  it('should not allow a user to watch more than the daily ad limit', async () => {
+    user.dailyAdCount = config.dailyAdLimit;
+    user.lastAdWatched = new Date().toISOString().slice(0, 10);
+    await user.save();
+
+    const res = await request(app)
+      .post('/api/tasks/daily/watch-ad');
+    expect(res.statusCode).toEqual(400);
+    expect(res.body.error).toBe('Daily ad limit reached');
   });
 });
