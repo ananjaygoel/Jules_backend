@@ -2,8 +2,15 @@
 const mongoose = require('mongoose');
 const User = require('../src/models/user');
 const dotenv = require('dotenv');
+const admin = require('firebase-admin');
 
 dotenv.config();
+
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
 const assignAdmin = async () => {
   if (process.argv.length < 3) {
@@ -17,6 +24,7 @@ const assignAdmin = async () => {
   const user = await User.findOneAndUpdate({ email }, { role: 'admin' }, { new: true });
 
   if (user) {
+    await admin.auth().setCustomUserClaims(user.firebaseUid, { role: 'admin' });
     console.log(`Successfully assigned admin role to ${user.email}`);
   } else {
     console.error(`User with email ${email} not found.`);

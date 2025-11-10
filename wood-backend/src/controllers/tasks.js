@@ -39,25 +39,21 @@ exports.monthlyBonus = async (req, res) => {
 
 // Daily tasks
 exports.watchAd = async (req, res) => {
-  const user = await User.findOne({ firebaseUid: req.user.uid });
   const todayUTC = getUTCDateString();
+  const user = await User.findOne({ firebaseUid: req.user.uid });
 
-  let dailyAdCount = user.dailyAdCount || 0;
-  if (user.lastAdWatched === todayUTC) {
-    if (dailyAdCount >= config.dailyAdLimit) {
-      return res.status(400).json({ error: 'Daily ad limit reached' });
-    }
-  } else {
-    dailyAdCount = 0;
+  const dailyAdCount = user.lastAdWatched === todayUTC ? user.dailyAdCount : 0;
+  if (dailyAdCount >= config.dailyAdLimit) {
+    return res.status(400).json({ error: 'Daily ad limit reached' });
   }
-  dailyAdCount++;
 
+  const newDailyAdCount = dailyAdCount + 1;
   let coins = 0;
-  if (dailyAdCount <= config.adRewards.tier1.limit) {
+  if (newDailyAdCount <= config.adRewards.tier1.limit) {
     coins = config.adRewards.tier1.coins;
-  } else if (dailyAdCount <= config.adRewards.tier2.limit) {
+  } else if (newDailyAdCount <= config.adRewards.tier2.limit) {
     coins = config.adRewards.tier2.coins;
-  } else if (dailyAdCount <= config.adRewards.tier3.limit) {
+  } else if (newDailyAdCount <= config.adRewards.tier3.limit) {
     coins = config.adRewards.tier3.coins;
   } else {
     coins = config.adRewards.tier4.coins;
@@ -67,15 +63,23 @@ exports.watchAd = async (req, res) => {
     coins += config.subscriptionBonus;
   }
 
-  await User.updateOne({ firebaseUid: req.user.uid }, { $inc: { coins }, dailyAdCount, lastAdWatched: todayUTC });
+  await User.updateOne(
+    { firebaseUid: req.user.uid },
+    { $inc: { coins }, dailyAdCount: newDailyAdCount, lastAdWatched: todayUTC }
+  );
   res.status(200).json({ coins_earned: coins });
 };
 
 // Ambitious tasks
 exports.spinWheel = async (req, res) => {
-  const user = await User.findOne({ firebaseUid: req.user.uid });
   const todayUTC = getUTCDateString();
-  if (user.lastSpinDate === todayUTC) {
+  const user = await User.findOneAndUpdate(
+    { firebaseUid: req.user.uid, lastSpinDate: { $ne: todayUTC } },
+    { lastSpinDate: todayUTC },
+    { new: true }
+  );
+
+  if (!user) {
     return res.status(400).json({ error: 'You can only spin the wheel once per day' });
   }
 
@@ -91,6 +95,6 @@ exports.spinWheel = async (req, res) => {
     coins += config.subscriptionBonus;
   }
 
-  await User.updateOne({ firebaseUid: req.user.uid }, { $inc: { coins }, lastSpinDate: todayUTC });
+  await User.updateOne({ firebaseUid: req.user.uid }, { $inc: { coins } });
   res.status(200).json({ coins_earned: coins });
 };
