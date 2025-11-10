@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const config = require('../config');
 
 const isSameDay = (date1, date2) => {
   return (
@@ -14,7 +15,7 @@ exports.completeProfile = async (req, res) => {
   if (user.profileCompleted) {
     return res.status(400).json({ error: 'Profile already completed' });
   }
-  const coins = Math.floor(Math.random() * 201) + 100; // 100-300 coins
+  const coins = Math.floor(Math.random() * (config.oneTimeTaskMaxCoins - config.oneTimeTaskMinCoins + 1)) + config.oneTimeTaskMinCoins;
   user.coins += coins;
   user.profileCompleted = true;
   await user.save();
@@ -25,7 +26,7 @@ exports.successfulReferral = async (req, res) => {
   const user = await User.findOne({ firebaseUid: req.user.uid });
   const now = new Date();
   if (user.lastReferralDate && user.lastReferralDate.getMonth() === now.getMonth()) {
-    if (user.referralsThisMonth >= 10) {
+    if (user.referralsThisMonth >= config.referralLimit) {
       return res.status(400).json({ error: 'Referral limit reached for this month' });
     }
     user.referralsThisMonth += 1;
@@ -34,7 +35,7 @@ exports.successfulReferral = async (req, res) => {
   }
   user.lastReferralDate = now;
 
-  const coins = Math.floor(Math.random() * 201) + 100; // 100-300 coins
+  const coins = Math.floor(Math.random() * (config.oneTimeTaskMaxCoins - config.oneTimeTaskMinCoins + 1)) + config.oneTimeTaskMinCoins;
   user.coins += coins;
   await user.save();
   res.status(200).json({ coins_earned: coins });
@@ -45,11 +46,10 @@ exports.followSocialMedia = async (req, res) => {
   if (user.followedSocialMedia) {
     return res.status(400).json({ error: 'Already followed on social media' });
   }
-  const coins = 150; // Fixed amount
-  user.coins += coins;
+  user.coins += config.followSocialMediaCoins;
   user.followedSocialMedia = true;
   await user.save();
-  res.status(200).json({ coins_earned: coins });
+  res.status(200).json({ coins_earned: config.followSocialMediaCoins });
 };
 
 // Daily tasks
@@ -58,7 +58,7 @@ exports.watchAd = async (req, res) => {
   const now = new Date();
 
   if (user.lastAdWatched && isSameDay(user.lastAdWatched, now)) {
-    if (user.dailyAdCount >= 30) {
+    if (user.dailyAdCount >= config.dailyAdLimit) {
       return res.status(400).json({ error: 'Daily ad limit reached' });
     }
     user.dailyAdCount += 1;
@@ -68,14 +68,18 @@ exports.watchAd = async (req, res) => {
   user.lastAdWatched = now;
 
   let coins = 0;
-  if (user.dailyAdCount <= 5) {
-    coins = 10;
-  } else if (user.dailyAdCount <= 10) {
-    coins = 20;
-  } else if (user.dailyAdCount <= 20) {
-    coins = 25;
+  if (user.dailyAdCount <= config.adRewards.tier1.limit) {
+    coins = config.adRewards.tier1.coins;
+  } else if (user.dailyAdCount <= config.adRewards.tier2.limit) {
+    coins = config.adRewards.tier2.coins;
+  } else if (user.dailyAdCount <= config.adRewards.tier3.limit) {
+    coins = config.adRewards.tier3.coins;
   } else {
-    coins = 30;
+    coins = config.adRewards.tier4.coins;
+  }
+
+  if (user.subscriptionStatus === 'active') {
+    coins += config.subscriptionBonus;
   }
 
   user.coins += coins;
@@ -93,11 +97,16 @@ exports.spinWheel = async (req, res) => {
 
   const spin = Math.random();
   let coins = 0;
-  if (spin < 0.0001) {
-    coins = 100;
-  } else if (spin < 0.9001) {
-    coins = 10;
+  if (spin < config.spinWheel.jackpotProbability) {
+    coins = config.spinWheel.jackpotAmount;
+  } else if (spin < config.spinWheel.winProbability) {
+    coins = config.spinWheel.winAmount;
   }
+
+  if (user.subscriptionStatus === 'active') {
+    coins += config.subscriptionBonus;
+  }
+
   user.coins += coins;
   user.lastSpinDate = now;
   await user.save();

@@ -1,8 +1,8 @@
 const admin = require('firebase-admin');
+const dotenv = require('dotenv');
 
-// IMPORTANT: Replace with your Firebase service account key
-// You can download this from your Firebase project settings
-// Store it securely, for example, in a .env file
+dotenv.config();
+
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
 
 admin.initializeApp({

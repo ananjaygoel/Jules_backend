@@ -4,6 +4,7 @@ const seriesSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
+    index: true,
   },
   description: {
     type: String,
@@ -12,6 +13,7 @@ const seriesSchema = new mongoose.Schema({
   genre: {
     type: String,
     required: true,
+    index: true,
   },
   coverImageUrl: {
     type: String,
