@@ -18,7 +18,7 @@ exports.register = async (req, res) => {
 
 exports.getUser = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findOne({ firebaseUid: req.user.uid });
     res.status(200).json(user);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -30,7 +30,7 @@ exports.updateUser = async (req, res) => {
     const allowedUpdates = ['name', 'date_of_birth', 'country', 'preferred_genres'];
     const updates = _.pick(req.body, allowedUpdates);
 
-    const user = await User.findByIdAndUpdate(req.params.id, updates, {
+    const user = await User.findOneAndUpdate({ firebaseUid: req.user.uid }, updates, {
       new: true,
     });
     res.status(200).json(user);

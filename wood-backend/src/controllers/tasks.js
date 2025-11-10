@@ -2,13 +2,7 @@ const User = require('../models/user');
 const config = require('../config');
 const { isSubscriptionActive } = require('../helpers/subscription');
 
-const isSameDay = (date1, date2) => {
-  return (
-    date1.getFullYear() === date2.getFullYear() &&
-    date1.getMonth() === date2.getMonth() &&
-    date1.getDate() === date2.getDate()
-  );
-};
+const getUTCDateString = () => new Date().toISOString().slice(0, 10);
 
 // One-time tasks
 exports.completeProfile = async (req, res) => {
@@ -17,28 +11,7 @@ exports.completeProfile = async (req, res) => {
     return res.status(400).json({ error: 'Profile already completed' });
   }
   const coins = Math.floor(Math.random() * (config.oneTimeTaskMaxCoins - config.oneTimeTaskMinCoins + 1)) + config.oneTimeTaskMinCoins;
-  user.coins += coins;
-  user.profileCompleted = true;
-  await user.save();
-  res.status(200).json({ coins_earned: coins });
-};
-
-exports.successfulReferral = async (req, res) => {
-  const user = await User.findOne({ firebaseUid: req.user.uid });
-  const now = new Date();
-  if (user.lastReferralDate && user.lastReferralDate.getMonth() === now.getMonth()) {
-    if (user.referralsThisMonth >= config.referralLimit) {
-      return res.status(400).json({ error: 'Referral limit reached for this month' });
-    }
-    user.referralsThisMonth += 1;
-  } else {
-    user.referralsThisMonth = 1;
-  }
-  user.lastReferralDate = now;
-
-  const coins = Math.floor(Math.random() * (config.oneTimeTaskMaxCoins - config.oneTimeTaskMinCoins + 1)) + config.oneTimeTaskMinCoins;
-  user.coins += coins;
-  await user.save();
+  await User.updateOne({ firebaseUid: req.user.uid }, { $inc: { coins }, profileCompleted: true });
   res.status(200).json({ coins_earned: coins });
 };
 
@@ -47,33 +20,44 @@ exports.followSocialMedia = async (req, res) => {
   if (user.followedSocialMedia) {
     return res.status(400).json({ error: 'Already followed on social media' });
   }
-  user.coins += config.followSocialMediaCoins;
-  user.followedSocialMedia = true;
-  await user.save();
+  await User.updateOne({ firebaseUid: req.user.uid }, { $inc: { coins: config.followSocialMediaCoins }, followedSocialMedia: true });
   res.status(200).json({ coins_earned: config.followSocialMediaCoins });
+};
+
+// Monthly tasks
+exports.monthlyBonus = async (req, res) => {
+  const user = await User.findOne({ firebaseUid: req.user.uid });
+  const now = new Date();
+  if (user.lastMonthlyBonus && user.lastMonthlyBonus.getMonth() === now.getMonth()) {
+    return res.status(400).json({ error: 'Monthly bonus already claimed for this month' });
+  }
+
+  const coins = Math.floor(Math.random() * (config.oneTimeTaskMaxCoins - config.oneTimeTaskMinCoins + 1)) + config.oneTimeTaskMinCoins;
+  await User.updateOne({ firebaseUid: req.user.uid }, { $inc: { coins }, lastMonthlyBonus: now });
+  res.status(200).json({ coins_earned: coins });
 };
 
 // Daily tasks
 exports.watchAd = async (req, res) => {
   const user = await User.findOne({ firebaseUid: req.user.uid });
-  const now = new Date();
+  const todayUTC = getUTCDateString();
 
-  if (user.lastAdWatched && isSameDay(user.lastAdWatched, now)) {
-    if (user.dailyAdCount >= config.dailyAdLimit) {
+  let dailyAdCount = user.dailyAdCount || 0;
+  if (user.lastAdWatched === todayUTC) {
+    if (dailyAdCount >= config.dailyAdLimit) {
       return res.status(400).json({ error: 'Daily ad limit reached' });
     }
-    user.dailyAdCount += 1;
   } else {
-    user.dailyAdCount = 1;
+    dailyAdCount = 0;
   }
-  user.lastAdWatched = now;
+  dailyAdCount++;
 
   let coins = 0;
-  if (user.dailyAdCount <= config.adRewards.tier1.limit) {
+  if (dailyAdCount <= config.adRewards.tier1.limit) {
     coins = config.adRewards.tier1.coins;
-  } else if (user.dailyAdCount <= config.adRewards.tier2.limit) {
+  } else if (dailyAdCount <= config.adRewards.tier2.limit) {
     coins = config.adRewards.tier2.coins;
-  } else if (user.dailyAdCount <= config.adRewards.tier3.limit) {
+  } else if (dailyAdCount <= config.adRewards.tier3.limit) {
     coins = config.adRewards.tier3.coins;
   } else {
     coins = config.adRewards.tier4.coins;
@@ -83,16 +67,15 @@ exports.watchAd = async (req, res) => {
     coins += config.subscriptionBonus;
   }
 
-  user.coins += coins;
-  await user.save();
+  await User.updateOne({ firebaseUid: req.user.uid }, { $inc: { coins }, dailyAdCount, lastAdWatched: todayUTC });
   res.status(200).json({ coins_earned: coins });
 };
 
 // Ambitious tasks
 exports.spinWheel = async (req, res) => {
   const user = await User.findOne({ firebaseUid: req.user.uid });
-  const now = new Date();
-  if (user.lastSpinDate && isSameDay(user.lastSpinDate, now)) {
+  const todayUTC = getUTCDateString();
+  if (user.lastSpinDate === todayUTC) {
     return res.status(400).json({ error: 'You can only spin the wheel once per day' });
   }
 
@@ -108,8 +91,6 @@ exports.spinWheel = async (req, res) => {
     coins += config.subscriptionBonus;
   }
 
-  user.coins += coins;
-  user.lastSpinDate = now;
-  await user.save();
+  await User.updateOne({ firebaseUid: req.user.uid }, { $inc: { coins }, lastSpinDate: todayUTC });
   res.status(200).json({ coins_earned: coins });
 };

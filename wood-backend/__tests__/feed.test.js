@@ -2,6 +2,8 @@ const request = require('supertest');
 const app = require('../src/index');
 const mongoose = require('mongoose');
 const User = require('../src/models/user');
+const Series = require('../src/models/series');
+const Episode = require('../src/models/episode');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
 // Mock the auth middleware
@@ -10,9 +12,11 @@ jest.mock('../src/middleware/auth', () => (req, res, next) => {
   next();
 });
 
-describe('User API', () => {
+describe('Feed API', () => {
   let mongoServer;
   let user;
+  let series;
+  let episode;
 
   beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
@@ -27,32 +31,37 @@ describe('User API', () => {
 
   beforeEach(async () => {
     await User.deleteMany();
+    await Series.deleteMany();
+    await Episode.deleteMany();
+
     user = new User({
       firebaseUid: 'test_uid',
       name: 'Test User',
       email: 'test@example.com',
+      coins: 10, // Not enough coins
     });
     await user.save();
+
+    series = new Series({
+      title: 'Test Series',
+      description: 'A test series',
+      genre: 'Drama',
+      coverImageUrl: 'http://example.com/cover.jpg',
+    });
+    await series.save();
+
+    episode = new Episode({
+      series: series._id,
+      episodeNumber: 20, // Paid episode
+      videoUrl: 'http://example.com/episode20.mp4',
+    });
+    await episode.save();
   });
 
-  it('should register a new user', async () => {
+  it('should not allow a user to unlock an episode with insufficient coins', async () => {
     const res = await request(app)
-      .post('/api/user/register')
-      .send({
-        firebaseUid: 'new_test_uid',
-        name: 'New Test User',
-        email: 'new_test@example.com',
-      });
-    expect(res.statusCode).toEqual(201);
-    expect(res.body.name).toBe('New Test User');
-  });
-
-  it('should not allow a user to update their role', async () => {
-    const res = await request(app)
-      .put('/api/user/me')
-      .send({ role: 'admin' });
-    expect(res.statusCode).toEqual(200);
-    const updatedUser = await User.findById(user._id);
-    expect(updatedUser.role).toBe('user');
+      .get(`/api/feed/episode/${episode._id}`);
+    expect(res.statusCode).toEqual(402);
+    expect(res.body.error).toBe('Insufficient coins');
   });
 });
