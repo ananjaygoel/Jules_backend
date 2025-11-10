@@ -33,8 +33,23 @@
     <button type="submit">Create Coupon</button>
   </form>
 
+  <h2>Assign Admin Role</h2>
+  <form id="assignAdminRoleForm">
+    <input type="email" id="adminEmail" placeholder="User Email" required>
+    <button type="submit">Assign Admin Role</button>
+  </form>
+
   <script>
     const authToken = prompt('Enter your Firebase ID token:');
+
+    const handleResponse = async (response) => {
+      if (response.ok) {
+        alert('Action successful!');
+      } else {
+        const error = await response.json();
+        alert(`Action failed: ${error.error}`);
+      }
+    };
 
     document.getElementById('createSeriesForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -42,7 +57,7 @@
       const description = document.getElementById('seriesDescription').value;
       const genre = document.getElementById('seriesGenre').value;
       const coverImageUrl = document.getElementById('seriesCoverImageUrl').value;
-      await fetch('/api/admin/series', {
+      const response = await fetch('/api/admin/series', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -50,6 +65,7 @@
         },
         body: JSON.stringify({ title, description, genre, coverImageUrl }),
       });
+      handleResponse(response);
     });
 
     document.getElementById('createEpisodeForm').addEventListener('submit', async (e) => {
@@ -57,7 +73,7 @@
       const series = document.getElementById('episodeSeriesId').value;
       const episodeNumber = document.getElementById('episodeNumber').value;
       const videoUrl = document.getElementById('episodeVideoUrl').value;
-      await fetch('/api/admin/episodes', {
+      const response = await fetch('/api/admin/episodes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -65,6 +81,7 @@
         },
         body: JSON.stringify({ series, episodeNumber, videoUrl }),
       });
+      handleResponse(response);
     });
 
     document.getElementById('createCouponForm').addEventListener('submit', async (e) => {
@@ -72,7 +89,7 @@
       const code = document.getElementById('couponCode').value;
       const discountPercentage = document.getElementById('couponDiscount').value;
       const expiryDate = document.getElementById('couponExpiry').value;
-      await fetch('/api/admin/coupons', {
+      const response = await fetch('/api/admin/coupons', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -80,6 +97,21 @@
         },
         body: JSON.stringify({ code, discountPercentage, expiryDate }),
       });
+      handleResponse(response);
+    });
+
+    document.getElementById('assignAdminRoleForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('adminEmail').value;
+      const response = await fetch('/api/admin/assign-admin-role', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ email }),
+      });
+      handleResponse(response);
     });
   </script>
 </body>

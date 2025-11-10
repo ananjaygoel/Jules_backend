@@ -22,4 +22,6 @@ router.delete('/episodes/:id', authMiddleware, isAdmin, adminController.deleteEp
 router.post('/coupons', authMiddleware, isAdmin, validationMiddleware(createCouponSchema), adminController.createCoupon);
 router.delete('/coupons/:id', authMiddleware, isAdmin, adminController.deleteCoupon);
 
+router.post('/assign-admin-role', authMiddleware, isAdmin, adminController.assignAdminRole);
+
 module.exports = router;
