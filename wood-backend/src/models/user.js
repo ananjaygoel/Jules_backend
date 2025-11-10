@@ -5,6 +5,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    index: true,
   },
   name: {
     type: String,
@@ -60,6 +61,14 @@ const userSchema = new mongoose.Schema({
   },
   stripeCustomerId: {
     type: String,
+  },
+  subscriptionStatus: {
+    type: String,
+    enum: ['active', 'inactive'],
+    default: 'inactive',
+  },
+  subscriptionExpiry: {
+    type: Date,
   },
 });
 

@@ -1,16 +1,71 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const User = require('../models/user');
+const Coupon = require('../models/coupon');
 
 exports.createPaymentIntent = async (req, res) => {
   const { amount, currency } = req.body;
+  const user = await User.findOne({ firebaseUid: req.user.uid });
+
+  if (!user.stripeCustomerId) {
+    const customer = await stripe.customers.create({ email: user.email });
+    user.stripeCustomerId = customer.id;
+    await user.save();
+  }
+
   try {
     const paymentIntent = await stripe.paymentIntents.create({
       amount,
       currency,
+      customer: user.stripeCustomerId,
     });
-    res.status(200).send({
-      clientSecret: paymentIntent.client_secret,
+    res.status(200).send({ clientSecret: paymentIntent.client_secret });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.createSubscription = async (req, res) => {
+  const { couponCode } = req.body;
+  const user = await User.findOne({ firebaseUid: req.user.uid });
+
+  if (!user.stripeCustomerId) {
+    const customer = await stripe.customers.create({ email: user.email });
+    user.stripeCustomerId = customer.id;
+    await user.save();
+  }
+
+  try {
+    const price = await stripe.prices.create({
+      unit_amount: 30000,
+      currency: 'inr',
+      recurring: { interval: 'year' },
+      product_data: { name: 'WOOD Annual Subscription' },
     });
+
+    const sessionOptions = {
+      payment_method_types: ['card'],
+      line_items: [{ price: price.id, quantity: 1 }],
+      mode: 'subscription',
+      customer: user.stripeCustomerId,
+      success_url: `${process.env.CLIENT_URL}/success`,
+      cancel_url: `${process.env.CLIENT_URL}/cancel`,
+    };
+
+    if (couponCode) {
+      const coupon = await Coupon.findOne({ code: couponCode });
+      if (coupon && coupon.expiryDate > new Date()) {
+        const stripeCoupon = await stripe.coupons.create({
+          percent_off: coupon.discountPercentage,
+          duration: 'once',
+        });
+        sessionOptions.discounts = [{ coupon: stripeCoupon.id }];
+      } else {
+        return res.status(400).json({ error: 'Invalid or expired coupon code.' });
+      }
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionOptions);
+    res.status(200).json({ sessionId: session.id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -28,7 +83,24 @@ exports.stripeWebhook = async (req, res) => {
 
   if (event.type === 'payment_intent.succeeded') {
     const paymentIntent = event.data.object;
-    // TODO: Fulfill the purchase (e.g., add coins to the user's account)
+    const user = await User.findOne({ stripeCustomerId: paymentIntent.customer });
+    if (user) {
+      const coinsPurchased = paymentIntent.amount_received;
+      user.coins += coinsPurchased;
+      await user.save();
+    }
+  }
+
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    const user = await User.findOne({ stripeCustomerId: session.customer });
+    if (user && session.mode === 'subscription') {
+      user.subscriptionStatus = 'active';
+      const expiryDate = new Date();
+      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+      user.subscriptionExpiry = expiryDate;
+      await user.save();
+    }
   }
 
   res.status(200).json({ received: true });

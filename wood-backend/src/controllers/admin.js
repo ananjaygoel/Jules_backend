@@ -1,5 +1,6 @@
 const Series = require('../models/series');
 const Episode = require('../models/episode');
+const Coupon = require('../models/coupon');
 
 exports.createSeries = async (req, res) => {
   try {
@@ -55,6 +56,25 @@ exports.updateEpisode = async (req, res) => {
 exports.deleteEpisode = async (req, res) => {
   try {
     await Episode.findByIdAndDelete(req.params.id);
+    res.status(204).send();
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+exports.createCoupon = async (req, res) => {
+  try {
+    const coupon = new Coupon(req.body);
+    await coupon.save();
+    res.status(201).json(coupon);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+exports.deleteCoupon = async (req, res) => {
+  try {
+    await Coupon.findByIdAndDelete(req.params.id);
     res.status(204).send();
   } catch (err) {
     res.status(400).json({ error: err.message });
