@@ -84,10 +84,30 @@ exports.spinWheel = async (req, res) => {
   }
 
   const spin = Math.random();
-  let coins = 0;
+  let result = 'no_win';
+  let potentialCoins = 0;
   if (spin < config.spinWheel.jackpotProbability) {
-    coins = config.spinWheel.jackpotAmount;
+    result = 'jackpot';
+    potentialCoins = config.spinWheel.jackpotAmount;
   } else if (spin < config.spinWheel.winProbability) {
+    result = 'win';
+    potentialCoins = config.spinWheel.winAmount;
+  }
+
+  // Store pending reward in user (add field if needed, or use session/temp)
+  // For simplicity, return result; assume Flutter handles ad and calls claim
+  res.status(200).json({ result, potentialCoins });
+};
+
+exports.claimSpinReward = async (req, res) => {
+  // Assume ad watched; award coins
+  const { result } = req.body; // From spin response
+  const user = await User.findOne({ firebaseUid: req.user.uid });
+
+  let coins = 0;
+  if (result === 'jackpot') {
+    coins = config.spinWheel.jackpotAmount;
+  } else if (result === 'win') {
     coins = config.spinWheel.winAmount;
   }
 

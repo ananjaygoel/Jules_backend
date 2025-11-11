@@ -17,7 +17,7 @@ const createSeriesSchema = Joi.object({
 const createEpisodeSchema = Joi.object({
   series: Joi.string().required(),
   episodeNumber: Joi.number().integer().min(1).required(),
-  videoUrl: Joi.string().uri().required(),
+  // videoUrl removed since it's now a file upload
 });
 
 const createCouponSchema = Joi.object({
@@ -30,8 +30,16 @@ const createSubscriptionSchema = Joi.object({
   couponCode: Joi.string(),
 });
 
+const updateUserSchema = Joi.object({
+  name: Joi.string(),
+  date_of_birth: Joi.date(),
+  country: Joi.string(),
+  preferred_genres: Joi.array().items(Joi.string()),
+  gender: Joi.string().valid('male', 'female', 'other', 'prefer_not_to_say'),
+});
+
 const assignAdminRoleSchema = Joi.object({
-  email: Joi.string().email().required(),
+  userId: Joi.string().required(),
 });
 
 const validationMiddleware = (schema) => {

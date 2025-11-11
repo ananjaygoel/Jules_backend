@@ -2,6 +2,9 @@ const Series = require('../models/series');
 const Episode = require('../models/episode');
 const Coupon = require('../models/coupon');
 const User = require('../models/user');
+const axios = require('axios');
+const FormData = require('form-data');
+const fs = require('fs');
 
 exports.createSeries = async (req, res) => {
   try {
@@ -35,7 +38,33 @@ exports.deleteSeries = async (req, res) => {
 
 exports.createEpisode = async (req, res) => {
   try {
-    const episode = new Episode(req.body);
+    const { series, episodeNumber } = req.body;
+    let videoUrl;
+
+    if (req.file) {
+      // Upload to FastPix
+      const formData = new FormData();
+      formData.append('file', fs.createReadStream(req.file.path), {
+        filename: req.file.originalname,
+        contentType: req.file.mimetype,
+      });
+      formData.append('workspaceId', '1122907598036205569'); // Your workspace key
+
+      const response = await axios.post('https://api.fastpix.io/v1/media', formData, {
+        headers: {
+          ...formData.getHeaders(),
+          'Authorization': `Bearer ${process.env.FASTPIX_API_KEY}`, // Add to .env
+        },
+      });
+
+      videoUrl = response.data.playback_url || response.data.url; // Adjust based on API response
+      // Optionally delete temp file
+      fs.unlinkSync(req.file.path);
+    } else {
+      videoUrl = req.body.videoUrl; // Fallback if no file
+    }
+
+    const episode = new Episode({ series, episodeNumber, videoUrl });
     await episode.save();
     res.status(201).json(episode);
   } catch (err) {
