@@ -6,12 +6,12 @@ class User {
   final DateTime? dateOfBirth;
   final String? country;
   final List<String> preferredGenres;
-  final int coins;
+  int coins;
   final String role;
-  final int dailyAdCount;
+  int dailyAdCount;
   final String? lastAdWatched;
-  final bool profileCompleted;
-  final bool followedSocialMedia;
+  bool profileCompleted;
+  bool followedSocialMedia;
   final DateTime? lastMonthlyBonus;
   final String? lastSpinDate;
   final String? stripeCustomerId;
@@ -47,7 +47,9 @@ class User {
       firebaseUid: json['firebaseUid'],
       name: json['name'],
       email: json['email'],
-      dateOfBirth: json['date_of_birth'] != null ? DateTime.parse(json['date_of_birth']) : null,
+      dateOfBirth: json['date_of_birth'] != null
+          ? DateTime.parse(json['date_of_birth'])
+          : null,
       country: json['country'],
       preferredGenres: List<String>.from(json['preferred_genres'] ?? []),
       coins: json['coins'] ?? 0,
@@ -56,11 +58,15 @@ class User {
       lastAdWatched: json['lastAdWatched'],
       profileCompleted: json['profileCompleted'] ?? false,
       followedSocialMedia: json['followedSocialMedia'] ?? false,
-      lastMonthlyBonus: json['lastMonthlyBonus'] != null ? DateTime.parse(json['lastMonthlyBonus']) : null,
+      lastMonthlyBonus: json['lastMonthlyBonus'] != null
+          ? DateTime.parse(json['lastMonthlyBonus'])
+          : null,
       lastSpinDate: json['lastSpinDate'],
       stripeCustomerId: json['stripeCustomerId'],
       subscriptionStatus: json['subscriptionStatus'] ?? 'inactive',
-      subscriptionExpiry: json['subscriptionExpiry'] != null ? DateTime.parse(json['subscriptionExpiry']) : null,
+      subscriptionExpiry: json['subscriptionExpiry'] != null
+          ? DateTime.parse(json['subscriptionExpiry'])
+          : null,
       gender: json['gender'],
     );
   }

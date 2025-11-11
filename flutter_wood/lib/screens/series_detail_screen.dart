@@ -42,15 +42,18 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
       setState(() {
         _isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to load series: $e')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Failed to load series: $e')));
     }
   }
 
   Future<void> _playEpisode(String episodeId) async {
     try {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final ep = await _apiService.getEpisode(await userProvider._authService.getToken() ?? '', episodeId);
-      _videoController = VideoPlayerController.networkUrl(Uri.parse(ep.videoUrl));
+      final ep = await _apiService.getEpisode(
+          await userProvider.getToken() ?? '', episodeId);
+      _videoController =
+          VideoPlayerController.networkUrl(Uri.parse(ep.videoUrl));
       await _videoController!.initialize();
       _chewieController = ChewieController(
         videoPlayerController: _videoController!,
@@ -67,7 +70,8 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
         ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.toString())));
     }
   }
 
@@ -89,11 +93,15 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Image.network(_series!.coverImageUrl, height: 200, fit: BoxFit.cover),
+                  Image.network(_series!.coverImageUrl,
+                      height: 200, fit: BoxFit.cover),
                   const SizedBox(height: 16),
-                  Text(_series!.description, style: const TextStyle(fontSize: 16)),
+                  Text(_series!.description,
+                      style: const TextStyle(fontSize: 16)),
                   const SizedBox(height: 16),
-                  Text('Episodes (${_episodes.length})', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text('Episodes (${_episodes.length})',
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold)),
                   ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),

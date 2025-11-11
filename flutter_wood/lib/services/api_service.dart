@@ -1,11 +1,16 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/user.dart';
 import '../models/series.dart';
 import '../models/episode.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:3000/api';
+  static String get baseUrl {
+    // Try to get from environment, fallback to localhost
+    final envUrl = dotenv.env['API_BASE_URL'];
+    return envUrl ?? 'http://localhost:3000/api';
+  }
 
   Future<Map<String, String>> _getHeaders(String? token) async {
     return {
@@ -19,7 +24,8 @@ class ApiService {
     final response = await http.post(
       Uri.parse('$baseUrl/user/register'),
       headers: await _getHeaders(null),
-      body: jsonEncode({'firebaseUid': firebaseUid, 'name': name, 'email': email}),
+      body: jsonEncode(
+          {'firebaseUid': firebaseUid, 'name': name, 'email': email}),
     );
     if (response.statusCode == 201) {
       return User.fromJson(jsonDecode(response.body));
@@ -54,14 +60,16 @@ class ApiService {
   }
 
   // Feed endpoints
-  Future<Map<String, dynamic>> getHomeFeed({int page = 1, int limit = 10}) async {
+  Future<Map<String, dynamic>> getHomeFeed(
+      {int page = 1, int limit = 10}) async {
     final response = await http.get(
       Uri.parse('$baseUrl/feed?page=$page&limit=$limit'),
     );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       return {
-        'series': (data['series'] as List).map((s) => Series.fromJson(s)).toList(),
+        'series':
+            (data['series'] as List).map((s) => Series.fromJson(s)).toList(),
         'total': data['total'],
         'page': data['page'],
         'pages': data['pages'],
@@ -77,7 +85,8 @@ class ApiService {
       final data = jsonDecode(response.body);
       return {
         'series': Series.fromJson(data['series']),
-        'episodes': (data['episodes'] as List).map((e) => Episode.fromJson(e)).toList(),
+        'episodes':
+            (data['episodes'] as List).map((e) => Episode.fromJson(e)).toList(),
       };
     } else {
       throw Exception('Failed to get series');
@@ -145,7 +154,8 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> claimSpinReward(String token, String result) async {
+  Future<Map<String, dynamic>> claimSpinReward(
+      String token, String result) async {
     final response = await http.post(
       Uri.parse('$baseUrl/tasks/ambitious/claim-spin-reward'),
       headers: await _getHeaders(token),
@@ -159,14 +169,16 @@ class ApiService {
   }
 
   // Search
-  Future<Map<String, dynamic>> searchSeries(String query, {int page = 1, int limit = 10}) async {
+  Future<Map<String, dynamic>> searchSeries(String query,
+      {int page = 1, int limit = 10}) async {
     final response = await http.get(
       Uri.parse('$baseUrl/search?query=$query&page=$page&limit=$limit'),
     );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       return {
-        'series': (data['series'] as List).map((s) => Series.fromJson(s)).toList(),
+        'series':
+            (data['series'] as List).map((s) => Series.fromJson(s)).toList(),
         'total': data['total'],
         'page': data['page'],
         'pages': data['pages'],
@@ -177,7 +189,8 @@ class ApiService {
   }
 
   // Payment
-  Future<Map<String, dynamic>> createPaymentIntent(String token, int amount, String currency) async {
+  Future<Map<String, dynamic>> createPaymentIntent(
+      String token, int amount, String currency) async {
     final response = await http.post(
       Uri.parse('$baseUrl/payment/create-payment-intent'),
       headers: await _getHeaders(token),
@@ -190,7 +203,8 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> createSubscription(String token, String? couponCode) async {
+  Future<Map<String, dynamic>> createSubscription(
+      String token, String? couponCode) async {
     final body = couponCode != null ? {'couponCode': couponCode} : {};
     final response = await http.post(
       Uri.parse('$baseUrl/payment/create-subscription'),

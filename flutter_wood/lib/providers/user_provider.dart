@@ -36,7 +36,8 @@ class UserProvider with ChangeNotifier {
   }
 
   Future<void> signUp(String email, String password, String name) async {
-    String? token = await _authService.signUpWithEmailPassword(email, password, name);
+    String? token =
+        await _authService.signUpWithEmailPassword(email, password, name);
     if (token != null) {
       _user = await _apiService.getUser(token);
       _isLoggedIn = true;
@@ -63,7 +64,7 @@ class UserProvider with ChangeNotifier {
     String? token = await _authService.getToken();
     if (token != null) {
       final result = await _apiService.completeProfile(token);
-      _user!.coins += result['coins_earned'];
+      _user!.coins += (result['coins_earned'] as int);
       _user!.profileCompleted = true;
       notifyListeners();
     }
@@ -73,7 +74,7 @@ class UserProvider with ChangeNotifier {
     String? token = await _authService.getToken();
     if (token != null) {
       final result = await _apiService.followSocialMedia(token);
-      _user!.coins += result['coins_earned'];
+      _user!.coins += (result['coins_earned'] as int);
       _user!.followedSocialMedia = true;
       notifyListeners();
     }
@@ -83,10 +84,14 @@ class UserProvider with ChangeNotifier {
     String? token = await _authService.getToken();
     if (token != null) {
       final result = await _apiService.watchAd(token);
-      _user!.coins += result['coins_earned'];
+      _user!.coins += (result['coins_earned'] as int);
       _user!.dailyAdCount++;
       notifyListeners();
     }
+  }
+
+  Future<String?> getToken() async {
+    return await _authService.getToken();
   }
 
   Future<Map<String, dynamic>> spinWheel() async {
@@ -101,7 +106,7 @@ class UserProvider with ChangeNotifier {
     String? token = await _authService.getToken();
     if (token != null) {
       final reward = await _apiService.claimSpinReward(token, result);
-      _user!.coins += reward['coins_earned'];
+      _user!.coins += (reward['coins_earned'] as int);
       notifyListeners();
     }
   }

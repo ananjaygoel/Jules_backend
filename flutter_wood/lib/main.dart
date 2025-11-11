@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'providers/user_provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/home_feed_screen.dart';
@@ -8,7 +9,16 @@ import 'themes/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await dotenv.load(fileName: ".env");
+
+  // Initialize Firebase (skip on web if no config available)
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    print('Firebase initialization failed: $e');
+    // Continue without Firebase for testing
+  }
+
   runApp(const MyApp());
 }
 
@@ -34,6 +44,8 @@ class AuthWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
-    return userProvider.isLoggedIn ? const HomeFeedScreen() : const LoginScreen();
+    return userProvider.isLoggedIn
+        ? const HomeFeedScreen()
+        : const LoginScreen();
   }
 }

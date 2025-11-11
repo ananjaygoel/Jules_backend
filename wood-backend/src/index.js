@@ -1,5 +1,6 @@
 const express = require('express');
 const dotenv = require('dotenv');
+const cors = require('cors');
 const connectDB = require('./db');
 const rateLimit = require('express-rate-limit');
 
@@ -20,7 +21,12 @@ const limiter = rateLimit({
   max: 100, // limit each IP to 100 requests per windowMs
 });
 
+app.set('trust proxy', 1); // Trust first proxy
 app.use(limiter);
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.static('public'));
 
