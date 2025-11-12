@@ -150,3 +150,34 @@ exports.claimRussianRouletteReward = async (req, res) => {
     await User.updateOne({ firebaseUid: req.user.uid }, { $inc: { coins } });
     res.status(200).json({ coins_earned: coins });
 };
+
+exports.scratchCard = async (req, res) => {
+    const todayUTC = getUTCDateString();
+    const user = await User.findOneAndUpdate(
+        { firebaseUid: req.user.uid, lastScratchCardDate: { $ne: todayUTC } },
+        { lastScratchCardDate: todayUTC },
+        { new: true }
+    );
+
+    if (!user) {
+        return res.status(400).json({ error: 'You can only use one scratch card per day' });
+    }
+
+    const potentialCoins = Math.floor(Math.random() * 50) + 10; // 10-60 coins
+
+    res.status(200).json({ potentialCoins });
+};
+
+exports.claimScratchCardReward = async (req, res) => {
+    const { potentialCoins } = req.body;
+    const user = await User.findOne({ firebaseUid: req.user.uid });
+
+    let coins = potentialCoins;
+
+    if (isSubscriptionActive(user)) {
+        coins += config.subscriptionBonus;
+    }
+
+    await User.updateOne({ firebaseUid: req.user.uid }, { $inc: { coins } });
+    res.status(200).json({ coins_earned: coins });
+};

@@ -90,7 +90,10 @@ const userSchema = new mongoose.Schema({
   startedSeries: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Series'
-  }]
+  }],
+  lastScratchCardDate: {
+    type: String, // YYYY-MM-DD in UTC
+  }
 });
 
 module.exports = mongoose.model('User', userSchema);

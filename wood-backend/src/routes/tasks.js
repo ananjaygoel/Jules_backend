@@ -18,5 +18,7 @@ router.post('/ambitious/spin-wheel', authMiddleware, tasksController.spinWheel);
 router.post('/ambitious/claim-spin-reward', authMiddleware, tasksController.claimSpinReward);
 router.post('/ambitious/russian-roulette', authMiddleware, tasksController.russianRoulette);
 router.post('/ambitious/claim-russian-roulette-reward', authMiddleware, tasksController.claimRussianRouletteReward);
+router.post('/ambitious/scratch-card', authMiddleware, tasksController.scratchCard);
+router.post('/ambitious/claim-scratch-card-reward', authMiddleware, tasksController.claimScratchCardReward);
 
 module.exports = router;
