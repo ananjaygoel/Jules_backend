@@ -30,6 +30,9 @@ exports.updateUser = async (req, res) => {
     const allowedUpdates = ['name', 'date_of_birth', 'country', 'preferred_genres', 'gender'];
     const updates = _.pick(req.body, allowedUpdates);
 
+    // Ensure role is not updated
+    delete updates.role;
+
     const user = await User.findOneAndUpdate({ firebaseUid: req.user.uid }, updates, {
       new: true,
     });
