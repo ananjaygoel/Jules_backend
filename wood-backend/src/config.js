@@ -4,12 +4,12 @@ module.exports = {
   oneTimeTaskMinCoins: 100,
   oneTimeTaskMaxCoins: 300,
   followSocialMediaCoins: 150,
-  dailyAdLimit: 30,
+  dailyAdLimit: 25,
   adRewards: {
     tier1: { limit: 5, coins: 10 },
     tier2: { limit: 10, coins: 20 },
     tier3: { limit: 20, coins: 25 },
-    tier4: { limit: 30, coins: 30 },
+    tier4: { limit: 25, coins: 30 },
   },
   spinWheel: {
     winProbability: 0.9001,
@@ -19,4 +19,14 @@ module.exports = {
   },
   subscriptionBonus: 50,
   referralLimit: 10,
+  membershipPlans: {
+    tier1: {
+        price: 300,
+        stripePriceId: 'price_1SSBrd1CWpG7UzlDX0OONq34',
+    },
+    tier2: {
+        price: 900,
+        stripePriceId: 'price_1SSVvB1CWpG7UzlDnViZuuOi',
+    }
+  }
 };

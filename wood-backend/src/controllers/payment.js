@@ -1,6 +1,7 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const User = require('../models/user');
 const Coupon = require('../models/coupon');
+const config = require('../config');
 
 exports.createPaymentIntent = async (req, res) => {
   const { amount, currency } = req.body;
@@ -25,7 +26,7 @@ exports.createPaymentIntent = async (req, res) => {
 };
 
 exports.createSubscription = async (req, res) => {
-  const { couponCode } = req.body;
+  const { plan, couponCode } = req.body;
   const user = await User.findOne({ firebaseUid: req.user.uid });
 
   if (!user.stripeCustomerId) {
@@ -37,7 +38,7 @@ exports.createSubscription = async (req, res) => {
   try {
     const sessionOptions = {
       payment_method_types: ['card'],
-      line_items: [{ price: process.env.STRIPE_PRICE_ID, quantity: 1 }],
+      line_items: [{ price: config.membershipPlans[plan].stripePriceId, quantity: 1 }],
       mode: 'subscription',
       customer: user.stripeCustomerId,
       success_url: `${process.env.CLIENT_URL}/success`,

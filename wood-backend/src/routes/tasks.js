@@ -16,5 +16,7 @@ router.post('/daily/watch-ad', authMiddleware, tasksController.watchAd);
 // Ambitious tasks
 router.post('/ambitious/spin-wheel', authMiddleware, tasksController.spinWheel);
 router.post('/ambitious/claim-spin-reward', authMiddleware, tasksController.claimSpinReward);
+router.post('/ambitious/russian-roulette', authMiddleware, tasksController.russianRoulette);
+router.post('/ambitious/claim-russian-roulette-reward', authMiddleware, tasksController.claimRussianRouletteReward);
 
 module.exports = router;

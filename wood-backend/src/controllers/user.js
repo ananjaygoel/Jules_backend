@@ -38,3 +38,12 @@ exports.updateUser = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
+
+exports.getStartedSeries = async (req, res) => {
+    try {
+        const user = await User.findOne({ firebaseUid: req.user.uid }).populate('startedSeries');
+        res.status(200).json(user.startedSeries);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+};

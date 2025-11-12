@@ -71,6 +71,26 @@ const userSchema = new mongoose.Schema({
   subscriptionExpiry: {
     type: Date,
   },
+  unlockedEpisodes: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Episode'
+  }],
+  referralCode: {
+    type: String,
+    unique: true,
+    sparse: true,
+  },
+  referredBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
+  lastRussianRouletteDate: {
+    type: String, // YYYY-MM-DD in UTC
+  },
+  startedSeries: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Series'
+  }]
 });
 
 module.exports = mongoose.model('User', userSchema);

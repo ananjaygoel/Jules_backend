@@ -11,6 +11,7 @@ const feedRoutes = require('./routes/feed');
 const tasksRoutes = require('./routes/tasks');
 const paymentRoutes = require('./routes/payment');
 const searchRoutes = require('./routes/search');
+const referralRoutes = require('./routes/referral');
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ app.use('/api/feed', feedRoutes);
 app.use('/api/tasks', tasksRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/referral', referralRoutes);
 
 // Start the server only if this file is run directly
 if (require.main === module) {

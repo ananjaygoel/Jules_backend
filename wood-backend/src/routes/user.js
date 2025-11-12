@@ -7,5 +7,6 @@ const authMiddleware = require('../middleware/auth');
 router.post('/register', validationMiddleware(registerSchema), userController.register);
 router.get('/me', authMiddleware, userController.getUser);
 router.put('/me', authMiddleware, validationMiddleware(updateUserSchema), userController.updateUser);
+router.get('/me/started-series', authMiddleware, userController.getStartedSeries);
 
 module.exports = router;
