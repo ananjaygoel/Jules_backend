@@ -1,5 +1,4 @@
 const User = require('../models/user');
-const _ = require('lodash');
 
 exports.register = async (req, res) => {
   try {
@@ -28,10 +27,12 @@ exports.getUser = async (req, res) => {
 exports.updateUser = async (req, res) => {
   try {
     const allowedUpdates = ['name', 'date_of_birth', 'country', 'preferred_genres', 'gender'];
-    const updates = _.pick(req.body, allowedUpdates);
-
-    // Ensure role is not updated
-    delete updates.role;
+    const updates = {};
+    for (const key in req.body) {
+        if (allowedUpdates.includes(key)) {
+            updates[key] = req.body[key];
+        }
+    }
 
     const user = await User.findOneAndUpdate({ firebaseUid: req.user.uid }, updates, {
       new: true,
