@@ -29,4 +29,29 @@ module.exports = {
         stripePriceId: 'price_1SSVvB1CWpG7UzlDnViZuuOi',
     }
   }
+  ,
+  iap: {
+    android: {
+      coins: [
+        { productId: 'coins_50', coins: 500 },
+        { productId: 'coins_100', coins: 1000 },
+        { productId: 'coins_200', coins: 2000 },
+      ],
+      subscriptions: [
+        { productId: 'sub_tier1', planKey: 'tier1' },
+        { productId: 'sub_tier2', planKey: 'tier2' },
+      ],
+    },
+    ios: {
+      coins: [
+        { productId: 'ios_coins_50', coins: 500 },
+        { productId: 'ios_coins_100', coins: 1000 },
+        { productId: 'ios_coins_200', coins: 2000 },
+      ],
+      subscriptions: [
+        { productId: 'ios_sub_tier1', planKey: 'tier1' },
+        { productId: 'ios_sub_tier2', planKey: 'tier2' },
+      ],
+    }
+  }
 };

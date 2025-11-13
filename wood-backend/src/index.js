@@ -10,6 +10,7 @@ const adminRoutes = require('./routes/admin');
 const feedRoutes = require('./routes/feed');
 const tasksRoutes = require('./routes/tasks');
 const paymentRoutes = require('./routes/payment');
+const paymentController = require('./controllers/payment');
 const searchRoutes = require('./routes/search');
 const referralRoutes = require('./routes/referral');
 
@@ -28,6 +29,10 @@ app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:3000',
   credentials: true
 }));
+// Use raw body ONLY for Stripe webhook (must come before express.json for that path)
+app.post('/api/payment/stripe-webhook', express.raw({ type: 'application/json' }), paymentController.stripeWebhook);
+
+// JSON parsing for all other routes
 app.use(express.json());
 app.use(express.static('public'));
 
@@ -36,7 +41,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/feed', feedRoutes);
 app.use('/api/tasks', tasksRoutes);
-app.use('/api/payment', paymentRoutes);
+app.use('/api/payment', paymentRoutes); // Note: webhook mounted above with express.raw
 app.use('/api/search', searchRoutes);
 app.use('/api/referral', referralRoutes);
 

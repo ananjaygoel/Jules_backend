@@ -33,6 +33,11 @@ exports.updateUser = async (req, res) => {
             updates[key] = req.body[key];
         }
     }
+    // If there are no allowed updates, just return the existing user unchanged
+    if (Object.keys(updates).length === 0) {
+      const existing = await User.findOne({ firebaseUid: req.user.uid });
+      return res.status(200).json(existing);
+    }
 
     const user = await User.findOneAndUpdate({ firebaseUid: req.user.uid }, updates, {
       new: true,

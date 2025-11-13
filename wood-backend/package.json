@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "test": "jest",
+  "test": "jest",
+  "lint": "eslint .",
     "assign-admin": "node scripts/assign-admin.js"
   },
   "keywords": [],
@@ -24,12 +25,14 @@
     "mongoose": "^8.19.3",
     "multer": "^1.4.5-lts.1",
     "nanoid": "^3.3.7",
-    "stripe": "^19.3.0"
+    "stripe": "^19.3.0",
+    "googleapis": "^136.0.0"
   },
   "devDependencies": {
     "jest": "^30.2.0",
     "mongodb-memory-server": "^10.3.0",
     "nodemon": "^3.1.10",
-    "supertest": "^7.1.4"
+    "supertest": "^7.1.4",
+    "eslint": "^8.57.0"
   }
 }

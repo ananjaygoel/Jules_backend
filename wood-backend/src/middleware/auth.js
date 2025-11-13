@@ -42,9 +42,10 @@ if (serviceAccount) {
 }
 
 const authMiddleware = async (req, res, next) => {
-  // If Firebase is not configured, skip auth for testing
+  // If Firebase is not configured, skip auth for testing and allow overriding uid via header
   if (!serviceAccount) {
-    req.user = {' uid':'6CKmf08aHPR1AH9LWKcBabREGkk2', email: 'test@example.com' };
+    const mockUid = req.headers['x-mock-uid'] || '6CKmf08aHPR1AH9LWKcBabREGkk2';
+    req.user = { uid: String(mockUid), email: 'test@example.com' };
     return next();
   }
 

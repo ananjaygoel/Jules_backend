@@ -36,7 +36,7 @@ const updateUserSchema = Joi.object({
   country: Joi.string(),
   preferred_genres: Joi.array().items(Joi.string()),
   gender: Joi.string().valid('male', 'female', 'other', 'prefer_not_to_say'),
-});
+}).unknown(true); // allow extra keys so disallowed fields are ignored upstream
 
 const assignAdminRoleSchema = Joi.object({
   userId: Joi.string().required(),
@@ -66,6 +66,7 @@ module.exports = {
   createCouponSchema,
   createSubscriptionSchema,
   assignAdminRoleSchema,
+  updateUserSchema,
   validationMiddleware,
   validateObjectId,
 };

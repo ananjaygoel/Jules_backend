@@ -93,6 +93,19 @@ const userSchema = new mongoose.Schema({
   }],
   lastScratchCardDate: {
     type: String, // YYYY-MM-DD in UTC
+  },
+  // IAP bookkeeping to prevent replay
+  androidInAppTokens: {
+    type: [String],
+    default: []
+  },
+  androidSubscriptionTokens: {
+    type: [String],
+    default: []
+  },
+  iosTransactionIds: {
+    type: [String],
+    default: []
   }
 });
 
