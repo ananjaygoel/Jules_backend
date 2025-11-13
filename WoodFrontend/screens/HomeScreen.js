@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, FlatList, Image } from 'react-native';
 import { theme } from '../src/theme';
 import { api } from '../src/api';
 import SeriesCard from '../components/SeriesCard';
+import { SkeletonGrid } from '../components/ui/Skeleton';
 
 export default function HomeScreen({ navigation }) {
   const [items, setItems] = useState([]);
@@ -44,7 +45,7 @@ export default function HomeScreen({ navigation }) {
       </View>
 
       {loading ? (
-        <Text style={{ color: theme.colors.textMuted }}>Loading…</Text>
+        <SkeletonGrid count={8} />
       ) : error ? (
         <Text style={{ color: theme.colors.textMuted }}>{String(error)}</Text>
       ) : (

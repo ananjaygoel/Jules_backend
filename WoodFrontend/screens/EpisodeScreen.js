@@ -6,6 +6,8 @@ import Button from '../components/ui/Button';
 import { Image } from 'expo-image';
 import { api } from '../src/api';
 import { theme } from '../src/theme';
+import { VideoView, useVideoPlayer } from 'expo-video';
+import { SkeletonBox } from '../components/ui/Skeleton';
 
 export default function EpisodeScreen({ route, navigation }) {
   const id = route?.params?.id;
@@ -57,17 +59,43 @@ export default function EpisodeScreen({ route, navigation }) {
     ]);
   }, [id]);
 
+  const previewUrl = ep?.previewUrl || ep?.videoPreviewUrl || ep?.videoUrl;
+  const player = useVideoPlayer(previewUrl || null, (p) => {
+    if (previewUrl) {
+      p.loop = true;
+      p.play();
+      p.volume = 0;
+      p.muted = true;
+    }
+  });
+
   return (
     <Screen>
       {loading ? (
-        <Text style={{ color: theme.colors.textMuted }}>Loading…</Text>
+        <View>
+          <SkeletonBox width={'100%'} height={220} borderRadius={12} />
+          <SkeletonBox width={'60%'} height={22} borderRadius={6} style={{ marginTop: 12 }} />
+          <SkeletonBox width={'90%'} height={14} borderRadius={6} style={{ marginTop: 8 }} />
+          <SkeletonBox width={'85%'} height={14} borderRadius={6} style={{ marginTop: 6 }} />
+          <View style={{ flexDirection: 'row', gap: 10, marginTop: 16 }}>
+            <SkeletonBox width={90} height={40} borderRadius={8} />
+            <SkeletonBox width={120} height={40} borderRadius={8} />
+          </View>
+        </View>
       ) : error ? (
         <Text style={{ color: theme.colors.textMuted }}>{String(error)}</Text>
       ) : ep ? (
         <View>
-          {ep.poster && (
+          {previewUrl ? (
+            <VideoView
+              player={player}
+              style={{ width: '100%', height: 220, borderRadius: 12, overflow: 'hidden', backgroundColor: '#111' }}
+              allowsFullscreen={false}
+              allowsPictureInPicture={false}
+            />
+          ) : ep.poster ? (
             <Image source={{ uri: ep.poster }} style={{ width: '100%', height: 220, borderRadius: 12 }} contentFit="cover" />
-          )}
+          ) : null}
           <Text style={{ fontSize: 24, marginTop: 12 }}>{ep.title}</Text>
           {ep.description ? (
             <Text style={{ color: theme.colors.textMuted, marginTop: 6 }}>{ep.description}</Text>

@@ -5,6 +5,7 @@ import Text from '../components/ui/Text';
 import { Image } from 'expo-image';
 import { api } from '../src/api';
 import { theme } from '../src/theme';
+import { SkeletonBox } from '../components/ui/Skeleton';
 
 export default function SeriesScreen({ route, navigation }) {
   const id = route?.params?.id;
@@ -33,7 +34,12 @@ export default function SeriesScreen({ route, navigation }) {
   return (
     <Screen>
       {loading ? (
-        <Text style={{ color: theme.colors.textMuted }}>Loading…</Text>
+        <View>
+          <SkeletonBox width={'100%'} height={220} borderRadius={12} />
+          <SkeletonBox width={'50%'} height={22} borderRadius={6} style={{ marginTop: 12 }} />
+          <SkeletonBox width={'80%'} height={14} borderRadius={6} style={{ marginTop: 8 }} />
+          <SkeletonBox width={'90%'} height={14} borderRadius={6} style={{ marginTop: 6 }} />
+        </View>
       ) : error ? (
         <Text style={{ color: theme.colors.textMuted }}>{String(error)}</Text>
       ) : series ? (
