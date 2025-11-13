@@ -1,0 +1,33 @@
+{
+  "name": "wood-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "expo": "^54.0.0",
+    "react": "18.2.0",
+    "@react-navigation/native": "^6.1.17",
+    "@react-navigation/native-stack": "^6.9.13",
+    "@stripe/stripe-react-native": "^0.37.0",
+    "react-native-iap": "^13.5.0",
+    "expo-splash-screen": "~0.27.5",
+    "expo-linear-gradient": "~13.0.2",
+    "expo-image": "~1.12.12",
+    "expo-video": "^3.0.14",
+    "@expo/vector-icons": "^14.0.4"
+  },
+  "devDependencies": {
+    "babel-preset-expo": "^11.0.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.35.0",
+    "eslint-plugin-react-native": "^4.1.0",
+    "eslint-plugin-react-hooks": "^4.6.0"
+  }
+}

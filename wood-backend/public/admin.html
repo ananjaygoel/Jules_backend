@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WOOD Admin Panel</title>
+</head>
+<body>
+  <h1>WOOD Admin Panel</h1>
+
+  <h2>Create Series</h2>
+  <form id="createSeriesForm">
+    <input type="text" id="seriesTitle" placeholder="Title" required>
+    <input type="text" id="seriesDescription" placeholder="Description" required>
+    <input type="text" id="seriesGenre" placeholder="Genre" required>
+    <input type="text" id="seriesCoverImageUrl" placeholder="Cover Image URL" required>
+    <button type="submit">Create Series</button>
+  </form>
+
+  <h2>Create Episode</h2>
+  <form id="createEpisodeForm">
+    <input type="text" id="episodeSeriesId" placeholder="Series ID" required>
+    <input type="number" id="episodeNumber" placeholder="Episode Number" required>
+    <input type="text" id="episodeVideoUrl" placeholder="Video URL" required>
+    <button type="submit">Create Episode</button>
+  </form>
+
+  <h2>Create Coupon</h2>
+  <form id="createCouponForm">
+    <input type="text" id="couponCode" placeholder="Code" required>
+    <input type="number" id="couponDiscount" placeholder="Discount Percentage" required>
+    <input type="date" id="couponExpiry" placeholder="Expiry Date" required>
+    <button type="submit">Create Coupon</button>
+  </form>
+
+  <h2>Assign Admin Role</h2>
+  <form id="assignAdminRoleForm">
+    <input type="email" id="adminEmail" placeholder="User Email" required>
+    <button type="submit">Assign Admin Role</button>
+  </form>
+
+  <script>
+    const authToken = prompt('Enter your Firebase ID token:');
+
+    const handleResponse = async (response) => {
+      if (response.ok) {
+        alert('Action successful!');
+      } else {
+        const error = await response.json();
+        alert(`Action failed: ${error.error}`);
+      }
+    };
+
+    document.getElementById('createSeriesForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('seriesTitle').value;
+      const description = document.getElementById('seriesDescription').value;
+      const genre = document.getElementById('seriesGenre').value;
+      const coverImageUrl = document.getElementById('seriesCoverImageUrl').value;
+      const response = await fetch('/api/admin/series', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ title, description, genre, coverImageUrl }),
+      });
+      handleResponse(response);
+    });
+
+    document.getElementById('createEpisodeForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const series = document.getElementById('episodeSeriesId').value;
+      const episodeNumber = document.getElementById('episodeNumber').value;
+      const videoUrl = document.getElementById('episodeVideoUrl').value;
+      const response = await fetch('/api/admin/episodes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ series, episodeNumber, videoUrl }),
+      });
+      handleResponse(response);
+    });
+
+    document.getElementById('createCouponForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const code = document.getElementById('couponCode').value;
+      const discountPercentage = document.getElementById('couponDiscount').value;
+      const expiryDate = document.getElementById('couponExpiry').value;
+      const response = await fetch('/api/admin/coupons', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ code, discountPercentage, expiryDate }),
+      });
+      handleResponse(response);
+    });
+
+    document.getElementById('assignAdminRoleForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('adminEmail').value;
+      const response = await fetch('/api/admin/assign-admin-role', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ email }),
+      });
+      handleResponse(response);
+    });
+  </script>
+</body>
+</html>
