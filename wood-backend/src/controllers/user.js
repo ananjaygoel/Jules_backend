@@ -1,5 +1,4 @@
 const User = require('../models/user');
-const _ = require('lodash');
 
 exports.register = async (req, res) => {
   try {
@@ -28,7 +27,17 @@ exports.getUser = async (req, res) => {
 exports.updateUser = async (req, res) => {
   try {
     const allowedUpdates = ['name', 'date_of_birth', 'country', 'preferred_genres', 'gender'];
-    const updates = _.pick(req.body, allowedUpdates);
+    const updates = {};
+    for (const key in req.body) {
+        if (allowedUpdates.includes(key)) {
+            updates[key] = req.body[key];
+        }
+    }
+    // If there are no allowed updates, just return the existing user unchanged
+    if (Object.keys(updates).length === 0) {
+      const existing = await User.findOne({ firebaseUid: req.user.uid });
+      return res.status(200).json(existing);
+    }
 
     const user = await User.findOneAndUpdate({ firebaseUid: req.user.uid }, updates, {
       new: true,
@@ -37,4 +46,13 @@ exports.updateUser = async (req, res) => {
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
+};
+
+exports.getStartedSeries = async (req, res) => {
+    try {
+        const user = await User.findOne({ firebaseUid: req.user.uid }).populate('startedSeries');
+        res.status(200).json(user.startedSeries);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
 };

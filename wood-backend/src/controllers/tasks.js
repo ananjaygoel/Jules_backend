@@ -94,14 +94,11 @@ exports.spinWheel = async (req, res) => {
     potentialCoins = config.spinWheel.winAmount;
   }
 
-  // Store pending reward in user (add field if needed, or use session/temp)
-  // For simplicity, return result; assume Flutter handles ad and calls claim
   res.status(200).json({ result, potentialCoins });
 };
 
 exports.claimSpinReward = async (req, res) => {
-  // Assume ad watched; award coins
-  const { result } = req.body; // From spin response
+  const { result } = req.body;
   const user = await User.findOne({ firebaseUid: req.user.uid });
 
   let coins = 0;
@@ -117,4 +114,70 @@ exports.claimSpinReward = async (req, res) => {
 
   await User.updateOne({ firebaseUid: req.user.uid }, { $inc: { coins } });
   res.status(200).json({ coins_earned: coins });
+};
+
+exports.russianRoulette = async (req, res) => {
+    const todayUTC = getUTCDateString();
+    const user = await User.findOneAndUpdate(
+        { firebaseUid: req.user.uid, lastRussianRouletteDate: { $ne: todayUTC } },
+        { lastRussianRouletteDate: todayUTC },
+        { new: true }
+    );
+
+    if (!user) {
+        return res.status(400).json({ error: 'You can only play Russian Roulette once per day' });
+    }
+
+    const result = Math.random() < 0.5 ? 'win' : 'lose';
+    const potentialCoins = result === 'win' ? 50 : 0;
+
+    res.status(200).json({ result, potentialCoins });
+};
+
+exports.claimRussianRouletteReward = async (req, res) => {
+    const { result } = req.body;
+    const user = await User.findOne({ firebaseUid: req.user.uid });
+
+    let coins = 0;
+    if (result === 'win') {
+        coins = 50;
+    }
+
+    if (isSubscriptionActive(user)) {
+        coins += config.subscriptionBonus;
+    }
+
+    await User.updateOne({ firebaseUid: req.user.uid }, { $inc: { coins } });
+    res.status(200).json({ coins_earned: coins });
+};
+
+exports.scratchCard = async (req, res) => {
+    const todayUTC = getUTCDateString();
+    const user = await User.findOneAndUpdate(
+        { firebaseUid: req.user.uid, lastScratchCardDate: { $ne: todayUTC } },
+        { lastScratchCardDate: todayUTC },
+        { new: true }
+    );
+
+    if (!user) {
+        return res.status(400).json({ error: 'You can only use one scratch card per day' });
+    }
+
+    const potentialCoins = Math.floor(Math.random() * 50) + 10; // 10-60 coins
+
+    res.status(200).json({ potentialCoins });
+};
+
+exports.claimScratchCardReward = async (req, res) => {
+    const { potentialCoins } = req.body;
+    const user = await User.findOne({ firebaseUid: req.user.uid });
+
+    let coins = potentialCoins;
+
+    if (isSubscriptionActive(user)) {
+        coins += config.subscriptionBonus;
+    }
+
+    await User.updateOne({ firebaseUid: req.user.uid }, { $inc: { coins } });
+    res.status(200).json({ coins_earned: coins });
 };

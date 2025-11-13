@@ -113,8 +113,8 @@ exports.deleteCoupon = async (req, res) => {
 
 exports.assignAdminRole = async (req, res) => {
   try {
-    const { email } = req.body;
-    const user = await User.findOneAndUpdate({ email }, { role: 'admin' }, { new: true });
+    const { userId } = req.body;
+    const user = await User.findByIdAndUpdate(userId, { role: 'admin' }, { new: true });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }

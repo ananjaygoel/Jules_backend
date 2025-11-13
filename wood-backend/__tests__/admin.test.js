@@ -56,7 +56,7 @@ describe('Admin API', () => {
   it('should assign the admin role to a user', async () => {
     const res = await request(app)
       .post('/api/admin/assign-admin-role')
-      .send({ email: 'test@example.com' });
+      .send({ userId: user._id });
     expect(res.statusCode).toEqual(200);
     const updatedUser = await User.findOne({ email: 'test@example.com' });
     expect(updatedUser.role).toBe('admin');
