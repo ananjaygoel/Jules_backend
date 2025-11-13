@@ -1,14 +1,62 @@
-import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, TouchableOpacity, FlatList, Image } from 'react-native';
 import { theme } from '../src/theme';
+import { api } from '../src/api';
+import SeriesCard from '../components/SeriesCard';
 
 export default function HomeScreen({ navigation }) {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await api.home({ page: 1, limit: 20 });
+        // expecting data to be an array of series; adapt if shape differs
+        setItems(Array.isArray(data) ? data : data?.items || []);
+      } catch (e) {
+        setError(e?.message || 'Failed to load feed');
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const renderItem = useCallback(({ item }) => (
+    <SeriesCard
+      title={item.title || item.name}
+      posterUrl={item.posterUrl || item.poster}
+      onPress={() => navigation.navigate('Series', { id: item._id || item.id })}
+    />
+  ), [navigation]);
+
   return (
-    <View style={{ flex: 1, backgroundColor: theme.colors.background, padding: 16 }}>
-      <Text style={{ color: theme.colors.text, fontSize: 22, marginBottom: 16 }}>Home</Text>
-      <TouchableOpacity onPress={() => navigation.navigate('Payments')} style={{ backgroundColor: theme.colors.card, padding: 12, borderRadius: 8 }}>
-        <Text style={{ color: theme.colors.text }}>Go to Payments</Text>
-      </TouchableOpacity>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background, paddingHorizontal: 14, paddingTop: 12 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <Image source={require('../assets/logo.png')} style={{ width: 28, height: 28, marginRight: 8 }} />
+          <Text style={{ color: theme.colors.text, fontSize: 20, fontWeight: '700' }}>WOOD</Text>
+        </View>
+        <TouchableOpacity onPress={() => navigation.navigate('Payments')} style={{ backgroundColor: theme.colors.card, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 8 }}>
+          <Text style={{ color: theme.colors.text }}>Premium</Text>
+        </TouchableOpacity>
+      </View>
+
+      {loading ? (
+        <Text style={{ color: theme.colors.textMuted }}>Loading…</Text>
+      ) : error ? (
+        <Text style={{ color: theme.colors.textMuted }}>{String(error)}</Text>
+      ) : (
+        <FlatList
+          data={items}
+          keyExtractor={(it, idx) => String(it._id || it.id || idx)}
+          numColumns={2}
+          columnWrapperStyle={{ justifyContent: 'space-between' }}
+          renderItem={renderItem}
+          contentContainerStyle={{ paddingBottom: 24 }}
+        />
+      )}
     </View>
   );
 }

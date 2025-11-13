@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { theme } from '../src/theme';
 
 export default function LoginScreen({ navigation }) {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background, alignItems: 'center', justifyContent: 'center' }}>
-      <Text style={{ color: theme.colors.text, fontSize: 28, marginBottom: 24 }}>WOOD</Text>
+      <Image source={require('../assets/logo.png')} style={{ width: 80, height: 80, marginBottom: 16 }} />
+      <Text style={{ color: theme.colors.text, fontSize: 28, marginBottom: 24, fontWeight: '700' }}>WOOD</Text>
       <TouchableOpacity onPress={() => navigation.replace('Home')} style={{ backgroundColor: theme.colors.primary, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 8 }}>
         <Text style={{ color: 'white', fontWeight: '600' }}>Continue</Text>
       </TouchableOpacity>

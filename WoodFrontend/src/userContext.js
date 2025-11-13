@@ -1,5 +1,17 @@
 import React, { createContext, useContext, useState } from 'react';
 
+const Ctx = createContext(null);
+
+export function UserProvider({ children }) {
+  const [user, setUser] = useState(null);
+  return <Ctx.Provider value={{ user, setUser }}>{children}</Ctx.Provider>;
+}
+
+export function useUser() {
+  return useContext(Ctx);
+}
+import React, { createContext, useContext, useState } from 'react';
+
 const UserCtx = createContext(null);
 
 export function UserProvider({ children }) {

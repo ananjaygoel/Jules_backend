@@ -1,0 +1,14 @@
+{
+  "env": { "es2021": true, "browser": true, "node": true },
+  "extends": ["eslint:recommended", "plugin:react/recommended", "plugin:react-native/all"],
+  "plugins": ["react", "react-native", "react-hooks"],
+  "parserOptions": { "ecmaFeatures": { "jsx": true }, "ecmaVersion": 12, "sourceType": "module" },
+  "settings": { "react": { "version": "detect" } },
+  "rules": {
+    "no-unused-vars": ["warn", { "args": "none", "ignoreRestSiblings": true }],
+    "eqeqeq": ["error", "always"],
+    "react/prop-types": "off",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
+  }
+}
